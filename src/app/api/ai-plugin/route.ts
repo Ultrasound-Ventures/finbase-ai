@@ -1,188 +1,72 @@
 // src/app/api/ai-plugin/route.ts
-import { ACCOUNT_ID, PLUGIN_URL } from "@/app/config";
 import { NextResponse } from "next/server";
+import { ACCOUNT_ID, PLUGIN_URL } from "@/app/config";
 
 export async function GET() {
     const pluginData = {
         openapi: "3.0.0",
         info: {
             title: "Zanna.Finance AI",
-            description: "Unlock your financial potential with Zanna.Finance AI - Your intelligent financial assistant",
+            description: "Your intelligent blockchain research and analysis assistant",
             version: "1.0.0",
         },
-        servers: [
-            {
-                url: PLUGIN_URL,
-            },
-        ],
+        servers: [{ url: PLUGIN_URL }],
         "x-mb": {
             "account-id": ACCOUNT_ID,
             assistant: {
                 name: "Zanna AI",
-                description: "Your intelligent financial assistant that helps with blockchain transactions, account management, and financial operations with a 5-second settlement time and 99.9% success rate.",
-                instructions: `You are Zanna AI, a sophisticated financial assistant. You help users with:
-                    1. Processing quick payments (5s settlement)
-                    2. Managing cross-chain transactions
-                    3. Real-time financial monitoring (24/7)
-                    4. Creating secure transactions on NEAR and EVM chains
-                
-                For blockchain transactions:
-                - NEAR: Use /api/tools/create-near-transaction then 'generate-transaction'
-                - EVM: Use /api/tools/create-evm-transaction then 'generate-evm-tx'
-                
-                Always maintain a professional, finance-focused tone and prioritize security and accuracy.`,
+                description: "A blockchain research specialist that helps analyze and compare different blockchain platforms.",
+                instructions: `You are Zanna AI, a blockchain analysis assistant. Help users understand:
+                    1. Different blockchain platforms (L1s and L2s)
+                    2. Platform comparisons and differences
+                    3. Technical features and capabilities
+                    4. Market trends and analysis
+                    
+                    When users ask about blockchains:
+                    1. Use /api/tools/get-blockchains to fetch blockchain data
+                    2. Provide informative comparisons
+                    3. Explain technical concepts simply
+                    4. Focus on user's specific interests`,
                 tools: [{ type: "generate-transaction" }, { type: "generate-evm-tx" }]
             },
         },
         paths: {
             "/api/tools/get-blockchains": {
                 get: {
-                    summary: "Get supported blockchain information",
-                    description: "Returns a list of supported blockchains for transactions",
+                    summary: "Get blockchain information",
+                    description: "Returns information about various blockchain platforms",
                     operationId: "get-blockchains",
-                    responses: {
-                        "200": {
-                            description: "Successful response",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            message: {
-                                                type: "string",
-                                                description: "List of supported blockchains",
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-            "/api/tools/get-user": {
-                get: {
-                    summary: "Get user account information",
-                    description: "Retrieve user's NEAR and EVM account details",
-                    operationId: "get-user",
-                    responses: {
-                        "200": {
-                            description: "Successful response",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            accountId: {
-                                                type: "string",
-                                                description: "User's NEAR account ID",
-                                            },
-                                            evmAddress: {
-                                                type: "string",
-                                                description: "User's MPC EVM address",
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-            "/api/tools/create-near-transaction": {
-                get: {
-                    operationId: "createNearTransaction",
-                    summary: "Create a NEAR transaction payload",
-                    description: "Generates a NEAR transaction payload for transferring tokens",
                     parameters: [
                         {
-                            name: "receiverId",
+                            name: "type",
                             in: "query",
-                            required: true,
-                            schema: {
-                                type: "string"
-                            },
-                            description: "The NEAR account ID of the receiver"
+                            description: "Filter by blockchain type (L1 or L2)",
+                            required: false,
+                            schema: { type: "string", enum: ["L1", "L2"] }
                         },
                         {
-                            name: "amount",
+                            name: "category",
                             in: "query",
-                            required: true,
-                            schema: {
-                                type: "string"
-                            },
-                            description: "The amount of NEAR tokens to transfer"
-                        }
-                    ],
-                    responses: {
-                        "200": {
-                            description: "Successful response",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            transactionPayload: {
-                                                type: "object",
-                                                properties: {
-                                                    receiverId: {
-                                                        type: "string",
-                                                        description: "The receiver's NEAR account ID"
-                                                    },
-                                                    actions: {
-                                                        type: "array",
-                                                        items: {
-                                                            type: "object",
-                                                            properties: {
-                                                                type: {
-                                                                    type: "string",
-                                                                    description: "The type of action"
-                                                                },
-                                                                params: {
-                                                                    type: "object",
-                                                                    properties: {
-                                                                        deposit: {
-                                                                            type: "string",
-                                                                            description: "The amount to transfer in yoctoNEAR"
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
+                            description: "Filter by category",
+                            required: false,
+                            schema: { 
+                                type: "string", 
+                                enum: ["Currency", "Smart Contract", "Scaling", "Interoperability"] 
                             }
-                        }
-                    }
-                }
-            },
-            "/api/tools/create-evm-transaction": {
-                get: {
-                    operationId: "createEvmTransaction",
-                    summary: "Create EVM transaction",
-                    description: "Generate an EVM transaction payload",
-                    parameters: [
-                        {
-                            name: "to",
-                            in: "query",
-                            required: true,
-                            schema: {
-                                type: "string"
-                            },
-                            description: "The EVM address of the recipient"
                         },
                         {
-                            name: "amount",
+                            name: "limit",
                             in: "query",
-                            required: true,
-                            schema: {
-                                type: "string"
-                            },
-                            description: "The amount of ETH to transfer"
+                            description: "Number of blockchains to return",
+                            required: false,
+                            schema: { type: "integer", minimum: 1, maximum: 20 }
+                        },
+                        {
+                            name: "details",
+                            in: "query",
+                            description: "Include detailed information",
+                            required: false,
+                            schema: { type: "boolean" }
                         }
                     ],
                     responses: {
@@ -193,24 +77,14 @@ export async function GET() {
                                     schema: {
                                         type: "object",
                                         properties: {
-                                            evmSignRequest: {
-                                                type: "object",
-                                                properties: {
-                                                    to: {
-                                                        type: "string",
-                                                        description: "Receiver address"
-                                                    },
-                                                    value: {
-                                                        type: "string",
-                                                        description: "Transaction value"
-                                                    },
-                                                    data: {
-                                                        type: "string",
-                                                        description: "Transaction data"
-                                                    },
-                                                    from: {
-                                                        type: "string",
-                                                        description: "Sender address"
+                                            blockchains: {
+                                                type: "array",
+                                                items: {
+                                                    type: "object",
+                                                    properties: {
+                                                        name: { type: "string" },
+                                                        type: { type: "string" },
+                                                        category: { type: "string" }
                                                     }
                                                 }
                                             }
