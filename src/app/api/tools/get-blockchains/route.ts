@@ -64,8 +64,8 @@ export async function GET(request: Request) {
         const category = searchParams.get('category') as BlockchainCategory | undefined;
         const details = searchParams.get('details') === 'true';
 
-        let filteredChains = filterBlockchains(blockchains, type, category);
-        let randomBlockchains = [...filteredChains]
+        const filteredChains = filterBlockchains(blockchains, type, category);
+        const randomBlockchains = [...filteredChains]
             .sort(() => 0.5 - Math.random())
             .slice(0, limit);
 

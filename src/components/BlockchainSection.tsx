@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 interface Blockchain {
   name: string;
@@ -18,11 +18,7 @@ const BlockchainSection: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>({ type: '', category: '' });
 
-  useEffect(() => {
-    fetchBlockchains();
-  }, [filter]);
-
-  const fetchBlockchains = async () => {
+  const fetchBlockchains = useCallback(async () => {
     try {
       const params = new URLSearchParams();
       if (filter.type) params.append('type', filter.type);
@@ -38,7 +34,11 @@ const BlockchainSection: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter]);
+
+  useEffect(() => {
+    fetchBlockchains();
+  }, [fetchBlockchains]);
 
   const getTypeColor = (type: 'L1' | 'L2'): string => {
     return type === 'L1' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800';
@@ -52,6 +52,11 @@ const BlockchainSection: React.FC = () => {
       'Interoperability': 'bg-orange-100 text-orange-800'
     } as const;
     return colors[category] || 'bg-gray-100 text-gray-800';
+  };
+
+  const handleAskAI = (blockchainName: string) => {
+    // Implement chat interaction here
+    console.log(`Tell me about ${blockchainName} blockchain`);
   };
 
   return (
@@ -110,10 +115,7 @@ const BlockchainSection: React.FC = () => {
                 
                 <div className="flex justify-between text-sm text-gray-600">
                   <button 
-                    onClick={() => {
-                      const message = `Tell me about ${blockchain.name} blockchain`;
-                      // You can implement the chat interaction here
-                    }}
+                    onClick={() => handleAskAI(blockchain.name)}
                     className="text-blue-600 hover:text-blue-800"
                   >
                     Ask Zanna AI →
