@@ -1,3 +1,4 @@
+// src/app/api/ai-plugin/route.ts
 import { ACCOUNT_ID, PLUGIN_URL } from "@/app/config";
 import { NextResponse } from "next/server";
 
@@ -5,8 +6,8 @@ export async function GET() {
     const pluginData = {
         openapi: "3.0.0",
         info: {
-            title: "Boilerplate",
-            description: "API for the boilerplate",
+            title: "Zanna.Finance AI",
+            description: "Unlock your financial potential with Zanna.Finance AI - Your intelligent financial assistant",
             version: "1.0.0",
         },
         servers: [
@@ -17,17 +18,27 @@ export async function GET() {
         "x-mb": {
             "account-id": ACCOUNT_ID,
             assistant: {
-                name: "Your Assistant",
-                description: "An assistant that answers with blockchain information, tells the user's account id, interacts with twitter, creates transaction payloads for NEAR and EVM blockchains, and flips coins.",
-                instructions: "You create near and evm transactions, give blockchain information, tell the user's account id, interact with twitter and flip coins. For blockchain transactions, first generate a transaction payload using the appropriate endpoint (/api/tools/create-near-transaction or /api/tools/create-evm-transaction), then explicitly use the 'generate-transaction' tool for NEAR or 'generate-evm-tx' tool for EVM to actually send the transaction on the client side. For EVM transactions, make sure to provide the 'to' address (recipient) and 'amount' (in ETH) parameters when calling /api/tools/create-evm-transaction. Simply getting the payload from the endpoints is not enough - the corresponding tool must be used to execute the transaction.",
+                name: "Zanna AI",
+                description: "Your intelligent financial assistant that helps with blockchain transactions, account management, and financial operations with a 5-second settlement time and 99.9% success rate.",
+                instructions: `You are Zanna AI, a sophisticated financial assistant. You help users with:
+                    1. Processing quick payments (5s settlement)
+                    2. Managing cross-chain transactions
+                    3. Real-time financial monitoring (24/7)
+                    4. Creating secure transactions on NEAR and EVM chains
+                
+                For blockchain transactions:
+                - NEAR: Use /api/tools/create-near-transaction then 'generate-transaction'
+                - EVM: Use /api/tools/create-evm-transaction then 'generate-evm-tx'
+                
+                Always maintain a professional, finance-focused tone and prioritize security and accuracy.`,
                 tools: [{ type: "generate-transaction" }, { type: "generate-evm-tx" }]
             },
         },
         paths: {
             "/api/tools/get-blockchains": {
                 get: {
-                    summary: "get blockchain information",
-                    description: "Respond with a list of blockchains",
+                    summary: "Get supported blockchain information",
+                    description: "Returns a list of supported blockchains for transactions",
                     operationId: "get-blockchains",
                     responses: {
                         "200": {
@@ -39,7 +50,7 @@ export async function GET() {
                                         properties: {
                                             message: {
                                                 type: "string",
-                                                description: "The list of blockchains",
+                                                description: "List of supported blockchains",
                                             },
                                         },
                                     },
@@ -51,8 +62,8 @@ export async function GET() {
             },
             "/api/tools/get-user": {
                 get: {
-                    summary: "get user information",
-                    description: "Respond with user account ID",
+                    summary: "Get user account information",
+                    description: "Retrieve user's NEAR and EVM account details",
                     operationId: "get-user",
                     responses: {
                         "200": {
@@ -64,11 +75,11 @@ export async function GET() {
                                         properties: {
                                             accountId: {
                                                 type: "string",
-                                                description: "The user's account ID",
+                                                description: "User's NEAR account ID",
                                             },
                                             evmAddress: {
                                                 type: "string",
-                                                description: "The user's MPC EVM address",
+                                                description: "User's MPC EVM address",
                                             },
                                         },
                                     },
@@ -78,106 +89,11 @@ export async function GET() {
                     },
                 },
             },
-            "/api/tools/twitter": {
-                get: {
-                    operationId: "getTwitterShareIntent",
-                    summary: "Generate a Twitter share intent URL",
-                    description: "Creates a Twitter share intent URL based on provided parameters",
-                    parameters: [
-                        {
-                            name: "text",
-                            in: "query",
-                            required: true,
-                            schema: {
-                                type: "string"
-                            },
-                            description: "The text content of the tweet"
-                        },
-                        {
-                            name: "url",
-                            in: "query",
-                            required: false,
-                            schema: {
-                                type: "string"
-                            },
-                            description: "The URL to be shared in the tweet"
-                        },
-                        {
-                            name: "hashtags",
-                            in: "query",
-                            required: false,
-                            schema: {
-                                type: "string"
-                            },
-                            description: "Comma-separated hashtags for the tweet"
-                        },
-                        {
-                            name: "via",
-                            in: "query",
-                            required: false,
-                            schema: {
-                                type: "string"
-                            },
-                            description: "The Twitter username to attribute the tweet to"
-                        }
-                    ],
-                    responses: {
-                        "200": {
-                            description: "Successful response",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            twitterIntentUrl: {
-                                                type: "string",
-                                                description: "The generated Twitter share intent URL"
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        "400": {
-                            description: "Bad request",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            error: {
-                                                type: "string",
-                                                description: "Error message"
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        "500": {
-                            description: "Error response",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            error: {
-                                                type: "string",
-                                                description: "Error message"
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
             "/api/tools/create-near-transaction": {
                 get: {
                     operationId: "createNearTransaction",
                     summary: "Create a NEAR transaction payload",
-                    description: "Generates a NEAR transaction payload for transferring tokens to be used directly in the generate-tx tool",
+                    description: "Generates a NEAR transaction payload for transferring tokens",
                     parameters: [
                         {
                             name: "receiverId",
@@ -220,7 +136,7 @@ export async function GET() {
                                                             properties: {
                                                                 type: {
                                                                     type: "string",
-                                                                    description: "The type of action (e.g., 'Transfer')"
+                                                                    description: "The type of action"
                                                                 },
                                                                 params: {
                                                                     type: "object",
@@ -240,38 +156,6 @@ export async function GET() {
                                     }
                                 }
                             }
-                        },
-                        "400": {
-                            description: "Bad request",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            error: {
-                                                type: "string",
-                                                description: "Error message"
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        "500": {
-                            description: "Error response",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            error: {
-                                                type: "string",
-                                                description: "Error message"
-                                            }
-                                        }
-                                    }
-                                }
-                            }
                         }
                     }
                 }
@@ -280,7 +164,7 @@ export async function GET() {
                 get: {
                     operationId: "createEvmTransaction",
                     summary: "Create EVM transaction",
-                    description: "Generate an EVM transaction payload with specified recipient and amount to be used directly in the generate-evm-tx tool",
+                    description: "Generate an EVM transaction payload",
                     parameters: [
                         {
                             name: "to",
@@ -334,85 +218,11 @@ export async function GET() {
                                     }
                                 }
                             }
-                        },
-                        "400": {
-                            description: "Bad request",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            error: {
-                                                type: "string",
-                                                description: "Error message"
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        "500": {
-                            description: "Server error",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            error: {
-                                                type: "string",
-                                                description: "Error message"
-                                            }
-                                        }
-                                    }
-                                }
-                            }
                         }
                     }
                 }
-            },
-            "/api/tools/coinflip": {
-                get: {
-                    summary: "Coin flip",
-                    description: "Flip a coin and return the result (heads or tails)",
-                    operationId: "coinFlip",
-                    responses: {
-                        "200": {
-                            description: "Successful response",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            result: {
-                                                type: "string",
-                                                description: "The result of the coin flip (heads or tails)",
-                                                enum: ["heads", "tails"]
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        "500": {
-                            description: "Error response",
-                            content: {
-                                "application/json": {
-                                    schema: {
-                                        type: "object",
-                                        properties: {
-                                            error: {
-                                                type: "string",
-                                                description: "Error message"
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-        },
+            }
+        }
     };
 
     return NextResponse.json(pluginData);
